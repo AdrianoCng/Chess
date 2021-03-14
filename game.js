@@ -6,6 +6,7 @@ const makeMove = (chess, { piece, source, target }) => {
         from: source,
         to: target,
         piece: piece[1],
+        promotion: "q"
     });
 };
 
