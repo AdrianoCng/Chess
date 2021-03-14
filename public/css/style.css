@@ -35,15 +35,38 @@ button {
     font-size: 1.4rem;
     border-radius: 5px;
     background-color: var(--light-blue);
-    width: 400px;
     cursor: pointer;
+}
+
+#practice-button,
+#play-button {
+    width: 400px;
 }
 
 a {
     margin: 15px;
 }
 
-div#board {
-    width: 80vh;
+#board {
+    width: 768px;
     margin: 30px auto;
+}
+
+.modal {
+    height: 250px;
+    width: 400px;
+    background-color: var(--white);
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 5px;
+    padding: 15px;
+    text-align: center;
 }

@@ -3,7 +3,7 @@ const socketio = require("socket.io");
 const path = require("path");
 const http = require("http");
 // Game Logic Functions
-const { Chess, makeMove, isGameOver } = require("./game");
+const { Chess, makeMove, getResult } = require("./game");
 
 const app = express();
 
@@ -52,19 +52,26 @@ io.on("connection", (socket) => {
             io.to(id).emit("orientation", color);
         })
 
+        // chess.fen() always returns the current position on the board in FEN string format
+
         io.to(roomID).emit("move", chess.fen());
 
         socket.on("move", (move) => {
             if (makeMove(chess, move)) {
                 io.to(roomID).emit("move", chess.fen());
 
-                if (isGameOver(chess, chess.fen())) {
-                    io.to(roomID).emit("gameover", "is gameOver");
+                if (chess.game_over()) {
+                    io.to(roomID).emit("gameover", getResult(chess))
                 }
             } else {
                 socket.emit("invalid move", chess.fen());
             }
         });
+
+        socket.on("reset", () => {
+            chess.reset();
+            io.to(roomID).emit("reset");
+        })
     });
 });
 

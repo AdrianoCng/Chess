@@ -9,9 +9,22 @@ const makeMove = (chess, { piece, source, target }) => {
     });
 };
 
-const isGameOver = (chess, fen) => {
-    chess.load(fen);
-    return chess.game_over();
-};
+const getResult = (chess) => {
+    if (chess.in_checkmate()) {
+        return `${chess.turn() === "b" ? "White" : "Black"} Wins!`;
+    }
 
-module.exports = { makeMove, isGameOver, Chess };
+    if (chess.in_stalemate()) {
+        return `${chess.turn() === "b" ? "Black" : "White"} has been stalemated!`;
+    }
+
+    if (chess.insufficient_material()) {
+        return "Draw due to insufficient material"
+    }
+
+    if (chess.in_draw()) {
+        return "Draw!";
+    }
+}
+
+module.exports = { makeMove, Chess, getResult };

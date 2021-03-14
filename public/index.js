@@ -44,7 +44,7 @@ socket.emit("join", roomID);
 
 socket.on("orientation", (color) => {
     board.orientation(color);
-})
+});
 
 // newPos and oldPos are FEN string from chess.fen() on the back end
 socket.on("move", (newPos) => {
@@ -54,9 +54,24 @@ socket.on("invalid move", (oldPos) => {
     board.position(oldPos);
 });
 
-socket.on("gameover", (msg) => console.log(msg));
+socket.on("gameover", (msg) => {
+    $(".modal > h1").html(msg)
+    $(".modal").css("display", "flex");
+});
 
 socket.on("full", () => {
     board.destroy();
     document.body.innerHTML = "Error - The game is already full"
+});
+
+// When the play again button is clicked it send a reset event to the server
+// The server will reset the chess instance and send a reset event to all the clients in the rooms
+$("#reset").on("click", () => {
+    socket.emit("reset");
+})
+
+// When the client receive the reset event the board will be resetted to the initial position
+socket.on("reset", () => {
+    board.start();
+    $(".modal").css("display", "none");
 })
