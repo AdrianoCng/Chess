@@ -20,9 +20,10 @@ app.get("/board", (req, res) => {
 let games = [];
 
 io.on("connection", (socket) => {
-    socket.on("join", (roomID) => {
+    socket.on("join", (roomID, updateBoardPosition) => {
         socket.join(roomID);
 
+        // Create a room in games: [] if doesn't exist already
         if (games.findIndex((game) => game.roomID === roomID) === -1) {
             const game = {
                 roomID,
@@ -30,35 +31,46 @@ io.on("connection", (socket) => {
                 players: [{
                     color: "white",
                     id: socket.id
-                }]
+                }],
+                lastMove: {
+                    target: "",
+                    source: ""
+                }
             };
 
             games.push(game);
         }
 
-        const { chess, players } = games.find((game) => game.roomID === roomID);
+        // Relevant chess instance
+        const { chess, players, lastMove } = games.find((game) => game.roomID === roomID);
 
+        // the user who is trying to join is disconnected if two players already in the same room
         if (players.length < 2 && players.findIndex(player => player.id === socket.id) === -1) {
             players.push({
                 color: "black",
                 id: socket.id
-            })
+            });
+
+            io.to(socket.id).emit("orientation", "black")
         } else if (players.length >= 2) {
             socket.emit("full");
             socket.disconnect();
         };
 
-        players.forEach(({ color, id }) => {
-            io.to(id).emit("orientation", color);
-        })
-
-        // chess.fen() always returns the current position on the board in FEN string format
-
-        io.to(roomID).emit("move", chess.fen());
+        updateBoardPosition(chess.fen(), lastMove.target, lastMove.source);
 
         socket.on("move", (move) => {
             if (makeMove(chess, move)) {
-                io.to(roomID).emit("move", chess.fen());
+                const newMove = {
+                    newPos: chess.fen(),
+                    source: move.source,
+                    target: move.target
+                };
+
+                lastMove.target = newMove.target;
+                lastMove.source = newMove.source;
+
+                io.to(roomID).emit("move", newMove);
 
                 if (chess.game_over()) {
                     io.to(roomID).emit("gameover", getResult(chess))
@@ -71,7 +83,14 @@ io.on("connection", (socket) => {
         socket.on("reset", () => {
             chess.reset();
             io.to(roomID).emit("reset");
-        })
+
+            // Swap colors
+            players.forEach(({ color, id }) => {
+                const newColor = color === "white" ? "black" : "white";
+                io.to(id).emit("orientation", newColor);
+            });
+        });
+
     });
 });
 

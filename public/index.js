@@ -1,32 +1,14 @@
-function onDrop(source, target, piece, newPos, oldPos, orientation) {
-    const move = {
-        source,
-        target,
-        piece,
-        newPos,
-        oldPos,
-        orientation,
-    };
+function highlightSquare(target, source) {
+    $("div[class^='square']").each(function () {
+        $(this).removeClass("highlight-target")
+        $(this).removeClass("highlight-source")
+    });
 
-    socket.emit("move", move);
-}
-
-function onDragStart(source, piece, position, orientation) {
-    if (
-        (orientation === "white" && piece.search(/^w/) === -1) ||
-        (orientation === "black" && piece.search(/^b/) === -1)
-    ) {
-        return false;
+    if (target && source) {
+        $(`.square-${target}`).addClass("highlight-target");
+        $(`.square-${source}`).addClass("highlight-source");
     }
 }
-
-
-const boardConfig = {
-    draggable: true,
-    position: "start",
-    onDrop,
-    onDragStart,
-};
 
 // Initialize chessboard
 const board = new Chessboard("board", boardConfig);
@@ -40,16 +22,23 @@ location.hash = roomID;
 
 const socket = io();
 
-socket.emit("join", roomID);
+socket.emit("join", roomID, (newPos, target, source) => {
+    board.position(newPos);
+    highlightSquare(target, source)
+});
 
 socket.on("orientation", (color) => {
     board.orientation(color);
 });
 
 // newPos and oldPos are FEN string from chess.fen() on the back end
-socket.on("move", (newPos) => {
+socket.on("move", ({ newPos, source, target }) => {
     board.position(newPos);
+
+    // highlight last move
+    highlightSquare(target, source);
 });
+
 socket.on("invalid move", (oldPos) => {
     board.position(oldPos);
 });
@@ -64,13 +53,13 @@ socket.on("full", () => {
     document.body.innerHTML = "Error - The game is already full"
 });
 
-// When the play again button is clicked it send a reset event to the server
-// The server will reset the chess instance and send a reset event to all the clients in the rooms
+// When the play again button is clicked it sends a "reset" event to the server
+// The server will reset the chess instance and send a "reset" event to all the clients in the rooms
 $("#reset").on("click", () => {
     socket.emit("reset");
 })
 
-// When the client receive the reset event the board will be resetted to the initial position
+// When the client receive the "reset" event the board will be resetted to the initial position
 socket.on("reset", () => {
     board.start();
     $(".modal").css("display", "none");
