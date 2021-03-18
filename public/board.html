@@ -6,10 +6,31 @@
         <title>Chess Game</title>
         <link rel="stylesheet" href="./css/chessboard-1.0.0.min.css" />
         <link rel="stylesheet" href="./css/style.css" />
+        <link
+            rel="stylesheet"
+            href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+            integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu"
+            crossorigin="anonymous"
+        />
     </head>
     <body>
-        <div id="board"></div>
-        <div class="modal">
+        <div class="container">
+            <div id="sidebar" class="box">
+                <div>Black to move</div>
+                <div class="notation">
+                    <ol>
+                        <li><span>e4</span><span class="active">e5</span></li>
+                    </ol>
+                </div>
+                <div class="sidebar-buttons">
+                    <button><i class="fas fa-undo"></i></button>
+                    <button>1/2</button>
+                    <button><i class="fas fa-handshake"></i></button>
+                </div>
+            </div>
+            <div id="board" class="box"></div>
+        </div>
+        <div class="modal box">
             <h1></h1>
             <button id="reset">Play again</button>
         </div>
