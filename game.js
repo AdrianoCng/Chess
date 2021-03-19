@@ -28,10 +28,10 @@ const getResult = (chess) => {
     }
 }
 
-const getPreviousMove = (chess) => {
+const getLastMove = (chess) => {
     const history = chess.history({ verbose: true });
 
     return history.length > 0 ? history[history.length - 1] : { from: "", to: "" };
 }
 
-module.exports = { makeMove, Chess, getResult, getPreviousMove };
+module.exports = { makeMove, Chess, getResult, getLastMove };

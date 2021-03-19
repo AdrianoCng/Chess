@@ -3,7 +3,7 @@ const socketio = require("socket.io");
 const path = require("path");
 const http = require("http");
 // Game Logic Functions
-const { Chess, makeMove, getResult, getPreviousMove } = require("./game");
+const { Chess, makeMove, getResult, getLastMove } = require("./game");
 
 const app = express();
 
@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
             socket.disconnect();
         };
 
-        const lastMove = getPreviousMove(chess);
+        const lastMove = getLastMove(chess);
 
         updateBoardPosition(chess.fen(), lastMove.to, lastMove.from, chess.turn());
 
@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
             if ((turn === "w" && orientation === "white") || (turn === "b" && orientation === "black")) {
                 chess.undo();
 
-                const { from, to } = getPreviousMove(chess);
+                const { from, to } = getLastMove(chess);
 
                 io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn())
             }
