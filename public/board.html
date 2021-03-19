@@ -16,23 +16,28 @@
     <body>
         <div class="container">
             <div id="sidebar" class="box">
-                <div>Black to move</div>
-                <div class="notation">
-                    <ol>
-                        <li><span>e4</span><span class="active">e5</span></li>
-                    </ol>
-                </div>
+                <img src="./img/chesspieces/wikipedia/bP.png" alt="pawn" />
+                <div id="turn"></div>
                 <div class="sidebar-buttons">
-                    <button><i class="fas fa-undo"></i></button>
-                    <button>1/2</button>
-                    <button><i class="fas fa-handshake"></i></button>
+                    <button id="undo-button">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button id="draw-button">&#189;</button>
+                    <button id="leave-button">
+                        <i class="fas fa-handshake"></i>
+                    </button>
                 </div>
             </div>
+            <div class="modal box">
+                <h1></h1>
+                <button id="reset">Play again</button>
+            </div>
+            <!-- <div class="notation">
+                <ol>
+                    <li><span>e4</span><span>e5</span></li>
+                </ol>
+            </div> -->
             <div id="board" class="box"></div>
-        </div>
-        <div class="modal box">
-            <h1></h1>
-            <button id="reset">Play again</button>
         </div>
 
         <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>

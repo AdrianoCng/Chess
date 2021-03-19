@@ -3,7 +3,7 @@ const socketio = require("socket.io");
 const path = require("path");
 const http = require("http");
 // Game Logic Functions
-const { Chess, makeMove, getResult } = require("./game");
+const { Chess, makeMove, getResult, getPreviousMove } = require("./game");
 
 const app = express();
 
@@ -31,18 +31,14 @@ io.on("connection", (socket) => {
                 players: [{
                     color: "white",
                     id: socket.id
-                }],
-                lastMove: {
-                    target: "",
-                    source: ""
-                }
+                }]
             };
 
             games.push(game);
         }
 
         // Relevant chess instance
-        const { chess, players, lastMove } = games.find((game) => game.roomID === roomID);
+        const { chess, players } = games.find((game) => game.roomID === roomID);
 
         // the user who is trying to join is disconnected if two players already in the same room
         if (players.length < 2 && players.findIndex(player => player.id === socket.id) === -1) {
@@ -57,7 +53,11 @@ io.on("connection", (socket) => {
             socket.disconnect();
         };
 
-        updateBoardPosition(chess.fen(), lastMove.target, lastMove.source);
+        const lastMove = getPreviousMove(chess);
+
+        updateBoardPosition(chess.fen(), lastMove.to, lastMove.from, chess.turn());
+
+        io.to(roomID).emit("turn", chess.turn());
 
         socket.on("move", (move) => {
             if (makeMove(chess, move)) {
@@ -67,10 +67,8 @@ io.on("connection", (socket) => {
                     target: move.target
                 };
 
-                lastMove.target = newMove.target;
-                lastMove.source = newMove.source;
-
                 io.to(roomID).emit("move", newMove);
+                io.to(roomID).emit("turn", chess.turn());
 
                 if (chess.game_over()) {
                     io.to(roomID).emit("gameover", getResult(chess))
@@ -90,6 +88,19 @@ io.on("connection", (socket) => {
                 io.to(id).emit("orientation", newColor);
             });
         });
+
+        socket.on("undo", (orientation) => {
+            const turn = chess.turn();
+
+            // Only allow to undo opponent moves
+            if ((turn === "w" && orientation === "white") || (turn === "b" && orientation === "black")) {
+                chess.undo();
+
+                const { from, to } = getPreviousMove(chess);
+
+                io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn())
+            }
+        })
 
     });
 });

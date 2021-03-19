@@ -1,6 +1,7 @@
 :root {
-    --light-blue: #4fc1e3;
+    --light-blue: #6da6c5;
     --white: #edeff1;
+    --black: #414a4c;
 }
 
 * {
@@ -11,6 +12,7 @@
 
 body {
     background-color: var(--white);
+    color: var(--black);
 }
 
 nav {
@@ -57,9 +59,15 @@ a {
     padding: 15px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
     height: 100%;
     gap: 15px;
+    grid-area: sidebar;
+}
+
+#board {
+    grid-area: board;
 }
 
 .sidebar-buttons {
@@ -67,26 +75,37 @@ a {
     justify-content: space-around;
     gap: 5px;
     width: 100%;
+    grid-area: buttons;
+}
+
+.sidebar-buttons button {
+    width: 100%;
+    height: 44px;
 }
 
 .container {
     display: grid;
     grid-template-columns: 1fr 2fr;
+    grid-template-rows: 1fr 2fr;
+    grid-template-areas:
+        "sidebar board"
+        "modal board";
     gap: 15px;
-    width: 1170px;
+    max-width: 1280px;
     margin: 30px auto;
     padding-left: 15px;
     padding-right: 15px;
     font-size: 1.5em;
 }
 
-.notation {
+/* .notation {
     width: 100%;
     height: 200px;
+    background-color: white;
     padding: 15px;
     box-shadow: 1px 1px 10px rgba(128, 128, 128, 0.4);
     border-radius: 5px;
-    flex-grow: 1;
+    grid-area: notation;
 }
 
 .notation ol {
@@ -104,17 +123,10 @@ a {
     padding-left: 5px;
     background-color: var(--white);
     color: black;
-}
+} */
 
 .modal {
-    height: 250px;
-    width: 400px;
-    background-color: var(--white);
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 999999;
+    background-color: white;
     display: none;
     justify-content: center;
     align-items: center;
@@ -122,6 +134,7 @@ a {
     gap: 15px;
     padding: 15px;
     text-align: center;
+    grid-area: modal;
 }
 
 .highlight-target {

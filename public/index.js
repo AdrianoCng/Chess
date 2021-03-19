@@ -10,6 +10,19 @@ function highlightSquare(target, source) {
     }
 }
 
+const displayTurn = (turn) => {
+    const imgSrc = `./img/chesspieces/wikipedia/${turn}P.png`
+    $("#turn").html(`${turn === "w" ? "White" : "Black"} to move`);
+    $("#sidebar img").attr("src", imgSrc);
+}
+
+const updateBoardPosition = (position, target, source, turn) => {
+    board.position(position);
+    highlightSquare(target, source);
+
+    displayTurn(turn);
+}
+
 // Initialize chessboard
 const board = new Chessboard("board", boardConfig);
 
@@ -22,10 +35,7 @@ location.hash = roomID;
 
 const socket = io();
 
-socket.emit("join", roomID, (newPos, target, source) => {
-    board.position(newPos);
-    highlightSquare(target, source)
-});
+socket.emit("join", roomID, updateBoardPosition);
 
 socket.on("orientation", (color) => {
     board.orientation(color);
@@ -48,10 +58,20 @@ socket.on("gameover", (msg) => {
     $(".modal").css("display", "flex");
 });
 
+socket.on("turn", displayTurn)
+
 socket.on("full", () => {
     board.destroy();
-    document.body.innerHTML = "Error - The game is already full"
+    document.body.innerHTML = "Error - This link has expired"
 });
+
+// When the client receive the "reset" event the board will be resetted to the initial position
+socket.on("reset", () => {
+    board.start();
+    $(".modal").css("display", "none");
+})
+
+socket.on("undo", updateBoardPosition)
 
 // When the play again button is clicked it sends a "reset" event to the server
 // The server will reset the chess instance and send a "reset" event to all the clients in the rooms
@@ -59,8 +79,6 @@ $("#reset").on("click", () => {
     socket.emit("reset");
 })
 
-// When the client receive the "reset" event the board will be resetted to the initial position
-socket.on("reset", () => {
-    board.start();
-    $(".modal").css("display", "none");
+$("#undo-button").on("click", () => {
+    socket.emit("undo", board.orientation());
 })
