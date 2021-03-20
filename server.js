@@ -83,10 +83,13 @@ io.on("connection", (socket) => {
             io.to(roomID).emit("reset");
 
             // Swap colors
-            players.forEach(({ color, id }) => {
-                const newColor = color === "white" ? "black" : "white";
-                io.to(id).emit("orientation", newColor);
-            });
+            for (let i = 0; i < players.length; i++) {
+                const player = players[i];
+
+                player.color = player.color === "white" ? "black" : "white";
+
+                io.to(player.id).emit("orientation", player.color);
+            }
         });
 
         socket.on("undo", (orientation) => {
