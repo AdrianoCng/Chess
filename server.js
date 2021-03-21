@@ -49,8 +49,8 @@ io.on("connection", (socket) => {
 
             io.to(socket.id).emit("orientation", "black")
         } else if (players.length >= 2) {
-            // socket.emit("full");
-            // socket.disconnect();
+            socket.emit("full");
+            socket.disconnect();
         };
 
         const lastMove = getLastMove(chess);
