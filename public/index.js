@@ -72,6 +72,7 @@ socket.on("full", () => {
 socket.on("reset", () => {
     board.start();
     boardConfig.draggable = true;
+
     $(".sidebar-buttons button").attr("disabled", false);
 
     $(".modal").css("display", "none");
