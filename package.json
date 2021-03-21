@@ -4,7 +4,8 @@
     "description": "Chess Game",
     "main": "server.js",
     "scripts": {
-        "dev": "nodemon server.js"
+        "dev": "nodemon server.js",
+        "start": "nf start"
     },
     "keywords": [],
     "author": "Adriano Cangiamila",
