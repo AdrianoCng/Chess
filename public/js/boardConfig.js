@@ -20,9 +20,14 @@ function onDragStart(source, piece, position, orientation) {
     }
 }
 
+function onChange() {
+    $(".modal").fadeOut(500);
+}
+
 const boardConfig = {
     draggable: true,
     position: "start",
     onDrop,
-    onDragStart
+    onDragStart,
+    onChange
 };
