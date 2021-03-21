@@ -49,15 +49,13 @@ io.on("connection", (socket) => {
 
             io.to(socket.id).emit("orientation", "black")
         } else if (players.length >= 2) {
-            socket.emit("full");
-            socket.disconnect();
+            // socket.emit("full");
+            // socket.disconnect();
         };
 
         const lastMove = getLastMove(chess);
 
         updateBoardPosition(chess.fen(), lastMove.to, lastMove.from, chess.turn());
-
-        io.to(roomID).emit("turn", chess.turn());
 
         socket.on("move", (move) => {
             if (makeMove(chess, move)) {
@@ -102,6 +100,24 @@ io.on("connection", (socket) => {
                 const { from, to } = getLastMove(chess);
 
                 io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn())
+            }
+        });
+
+        socket.on("surrender", (player) => {
+            io.to(roomID).emit("gameover", `${player === "white" ? "Black" : "White"} wins!`)
+        })
+
+        // accepted can be:
+        // undefined if the user is asking for a draw
+        // true if the opponent accepted
+        // false if the opponent declined
+        socket.on("draw offer", (accepted) => {
+            if (accepted) {
+                io.to(roomID).emit("gameover", "Draw!")
+            } else if (accepted === false) {
+                socket.broadcast.to(roomID).emit("offer draw", false);
+            } else {
+                socket.broadcast.to(roomID).emit("offer draw");
             }
         })
 

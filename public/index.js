@@ -54,7 +54,10 @@ socket.on("invalid move", (oldPos) => {
 });
 
 socket.on("gameover", (msg) => {
-    $(".modal > h1").html(msg)
+    boardConfig.draggable = false;
+    $(".sidebar-buttons button").attr("disabled", true);
+
+    $(".modal").html(`<h1>${msg}</h1><button id="reset">Play again</button>`)
     $(".modal").css("display", "flex");
 });
 
@@ -68,17 +71,56 @@ socket.on("full", () => {
 // When the client receive the "reset" event the board will be resetted to the initial position
 socket.on("reset", () => {
     board.start();
+    boardConfig.draggable = true;
+    $(".sidebar-buttons button").attr("disabled", false);
+
     $(".modal").css("display", "none");
 })
 
 socket.on("undo", updateBoardPosition)
 
+socket.on("offer draw", (accepted) => {
+    if (accepted === false) {
+        $(".modal").html("<p>Your opponent declined your offer</p>");
+        $(".modal").delay(4000).fadeOut(1500);
+    } else {
+        $(".modal").html(`<p>Your opponent offers a draw</p>
+                      <div>
+                        <button id="decline">Decline</button>   <button id="accept">Accept</button>
+                      </div>
+                    `);
+    }
+
+    $(".modal").css("display", "flex");
+})
+
 // When the play again button is clicked it sends a "reset" event to the server
 // The server will reset the chess instance and send a "reset" event to all the clients in the rooms
-$("#reset").on("click", () => {
+$(document).on("click", "#reset", () => {
     socket.emit("reset");
+})
+
+$(document).on("click", "#decline", () => {
+    socket.emit("draw offer", false);
+    $(".modal").css("display", "none");
+})
+
+$(document).on("click", "#accept", () => {
+    socket.emit("draw offer", true);
+    $(".modal").css("display", "none");
 })
 
 $("#undo-button").on("click", () => {
     socket.emit("undo", board.orientation());
+})
+
+$("#leave-button").on("click", () => {
+    socket.emit("surrender", board.orientation());
+})
+
+$("#draw-button").on("click", () => {
+    socket.emit("draw offer");
+
+    $(".modal").html("<p>Draw offer sent. Waiting for the opponent.</p>")
+    $(".modal").css("display", "flex");
 })
