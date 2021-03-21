@@ -114,6 +114,12 @@ socket.on("offer draw", (accepted) => {
     $(".modal").css("display", "flex");
 })
 
+socket.on("user leave", () => {
+    boardConfig.draggable = false;
+    $(".modal").html("Your opponent left. You Win!");
+    $(".modal").css("display", "flex");
+})
+
 // When the play again button is clicked it sends a "reset" event to the server
 // The server will reset the chess instance and send a "reset" event to all the clients in the rooms
 $(document).on("click", "#reset", () => {
