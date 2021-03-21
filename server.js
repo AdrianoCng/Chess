@@ -121,6 +121,12 @@ io.on("connection", (socket) => {
             }
         })
 
+        socket.on("disconnect", () => {
+            const player = players.find(player => player.id !== socket.id);
+            if (player) {
+                socket.broadcast.to(roomID).emit("user leave");
+            }
+        })
     });
 });
 
