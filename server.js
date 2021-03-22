@@ -57,6 +57,7 @@ io.on("connection", (socket) => {
 
         updateBoardPosition(chess.fen(), lastMove.to, lastMove.from, chess.turn());
 
+        // ON MOVE
         socket.on("move", (move) => {
             if (makeMove(chess, move)) {
                 const newMove = {
@@ -76,6 +77,7 @@ io.on("connection", (socket) => {
             }
         });
 
+        // ON RESET
         socket.on("reset", () => {
             chess.reset();
             io.to(roomID).emit("reset");
@@ -90,22 +92,42 @@ io.on("connection", (socket) => {
             }
         });
 
-        socket.on("undo", (orientation) => {
+        // ON UNDO REQUEST
+        socket.on("undo request", (orientation) => {
             const turn = chess.turn();
 
-            // Only allow to undo opponent moves
-            if ((turn === "w" && orientation === "white") || (turn === "b" && orientation === "black")) {
+            if ((orientation === "white" && turn === "w") || (orientation === "black" && turn === "b")) {
                 chess.undo();
 
-                const { from, to } = getLastMove(chess);
+                const { to, from } = getLastMove(chess);
 
-                io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn())
+                io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn());
+            } else {
+                socket.emit("undo request", true)
+                socket.broadcast.to(roomID).emit("undo request");
             }
         });
+        socket.on("undo accepted", () => {
+            chess.undo();
 
+            const { to, from } = getLastMove(chess);
+
+            io.to(roomID).emit("undo", chess.fen(), to, from, chess.turn());
+        });
+
+        socket.on("undo declined", () => {
+            socket.broadcast.to(roomID).emit("undo declined");
+        })
+        // -->
+
+
+        // ON SURRENDER
         socket.on("surrender", (player) => {
             io.to(roomID).emit("gameover", `${player === "white" ? "Black" : "White"} wins!`)
         })
+
+
+        // ON DRAW OFFER
 
         // accepted can be:
         // undefined if the user is asking for a draw

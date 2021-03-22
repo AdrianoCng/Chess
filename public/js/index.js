@@ -78,16 +78,35 @@ socket.on("reset", () => {
     $(".modal").css("display", "none");
 })
 
-socket.on("undo", updateBoardPosition)
+socket.on("undo request", (requesting) => {
+    if (requesting) {
+        $(".modal").html("<p>Request sent</p>");
+        $(".modal").css("display", "flex");
+    } else {
+        $(".modal").html(`<p>Your opponent wants to take back his last move</p>
+                          <div>
+                            <button id="decline-undo">Decline</button> <button id="accept-undo">Accept</button>
+                          </div>
+        `);
+        $(".modal").css("display", "flex");
+    }
+});
+
+socket.on("undo", updateBoardPosition);
+
+socket.on("undo declined", () => {
+    $(".modal").html("Your opponed did not agree to take back your last move");
+    $(".modal").css("display", "flex").delay(4000).fadeOut(500);
+})
 
 socket.on("offer draw", (accepted) => {
     if (accepted === false) {
         $(".modal").html("<p>Your opponent declined your offer</p>");
-        $(".modal").delay(4000).fadeOut(1500);
+        $(".modal").delay(4000).fadeOut(500);
     } else {
         $(".modal").html(`<p>Your opponent offers a draw</p>
                       <div>
-                        <button id="decline">Decline</button>   <button id="accept">Accept</button>
+                        <button id="decline-draw">Decline</button>   <button id="accept-draw">Accept</button>
                       </div>
                     `);
     }
@@ -107,18 +126,28 @@ $(document).on("click", "#reset", () => {
     socket.emit("reset");
 })
 
-$(document).on("click", "#decline", () => {
+$(document).on("click", "#decline-draw", () => {
     socket.emit("draw offer", false);
     $(".modal").css("display", "none");
 })
 
-$(document).on("click", "#accept", () => {
+$(document).on("click", "#accept-draw", () => {
     socket.emit("draw offer", true);
     $(".modal").css("display", "none");
 })
 
+$(document).on("click", "#accept-undo", () => {
+    socket.emit("undo accepted")
+    $(".modal").css("display", "none");
+})
+
+$(document).on("click", "#decline-undo", () => {
+    socket.emit("undo declined");
+    $(".modal").css("display", "none");
+})
+
 $("#undo-button").on("click", () => {
-    socket.emit("undo", board.orientation());
+    socket.emit("undo request", board.orientation());
 })
 
 $("#leave-button").on("click", () => {
