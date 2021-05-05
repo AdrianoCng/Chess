@@ -17,6 +17,10 @@ app.get("/board", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "board.html"));
 });
 
+app.get("/puzzle", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "puzzle.html"));
+})
+
 let games = [];
 
 io.on("connection", (socket) => {
@@ -47,6 +51,7 @@ io.on("connection", (socket) => {
                 id: socket.id
             });
 
+            socket.broadcast.to(roomID).emit("join");
             io.to(socket.id).emit("orientation", "black")
         } else if (players.length >= 2) {
             socket.emit("full");
@@ -81,6 +86,8 @@ io.on("connection", (socket) => {
         socket.on("reset", () => {
             chess.reset();
             io.to(roomID).emit("reset");
+            io.to(roomID).emit("turn", chess.turn());
+
 
             // Swap colors
             for (let i = 0; i < players.length; i++) {

@@ -31,3 +31,5 @@ const boardConfig = {
     onDragStart,
     onChange
 };
+
+const board = new Chessboard("board", boardConfig);

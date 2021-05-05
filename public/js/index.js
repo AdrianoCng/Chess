@@ -13,7 +13,7 @@ function highlightSquare(target, source) {
 const displayTurn = (turn) => {
     const imgSrc = `./img/chesspieces/wikipedia/${turn}P.png`
     $("#turn").html(`${turn === "w" ? "White" : "Black"} to move`);
-    $("#sidebar img").attr("src", imgSrc);
+    $(".sidebar img").attr("src", imgSrc);
 }
 
 const updateBoardPosition = (position, target, source, turn) => {
@@ -23,8 +23,11 @@ const updateBoardPosition = (position, target, source, turn) => {
     displayTurn(turn);
 }
 
-// Initialize chessboard
-const board = new Chessboard("board", boardConfig);
+// Prompt alert when user try to refresh the page
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+});
 
 // Create roomID if not exist
 const roomID = location.hash
@@ -36,6 +39,11 @@ location.hash = roomID;
 const socket = io();
 
 socket.emit("join", roomID, updateBoardPosition);
+
+socket.on("join", () => {
+    $(".modal").html("Your opponents has joined the game");
+    $(".modal").css("display", "flex").delay(4000).fadeOut(500);
+})
 
 socket.on("orientation", (color) => {
     board.orientation(color);
@@ -116,6 +124,8 @@ socket.on("offer draw", (accepted) => {
 
 socket.on("user leave", () => {
     boardConfig.draggable = false;
+    $(".sidebar-buttons button").attr("disabled", true);
+
     $(".modal").html("Your opponent left. You Win!");
     $(".modal").css("display", "flex");
 })
