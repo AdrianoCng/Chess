@@ -41,7 +41,7 @@ const socket = io();
 socket.emit("join", roomID, updateBoardPosition);
 
 socket.on("join", () => {
-    $(".modal").html("Your opponents has joined the game");
+    $(".modal").html("Your opponent has joined the game");
     $(".modal").css("display", "flex").delay(4000).fadeOut(500);
 })
 
